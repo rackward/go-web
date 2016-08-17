@@ -99,7 +99,7 @@ func (s *service) register() error {
 	if s.srv == nil {
 		return nil
 	}
-	return registry.Register(s.srv, registry.RegisterTTL(s.opts.RegisterTTL))
+	return s.opts.Registry.Register(s.srv, registry.RegisterTTL(s.opts.RegisterTTL))
 }
 
 func (s *service) deregister() error {

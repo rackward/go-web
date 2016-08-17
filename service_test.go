@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/micro/go-micro/registry"
 	"github.com/micro/go-micro/registry/mock"
 )
 
@@ -18,11 +17,11 @@ func TestService(t *testing.T) {
 		fmt.Fprint(w, str)
 	}
 
-	// ugly hack
-	registry.DefaultRegistry = registry.Registry(mock.NewRegistry())
+	registry := mock.NewRegistry()
 
 	service := NewService(
 		Name("go.micro.web.test"),
+		Registry(registry),
 	)
 
 	service.HandleFunc("/", fn)
