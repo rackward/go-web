@@ -55,3 +55,56 @@ func TestService(t *testing.T) {
 		t.Errorf("Expected %s got %s", str, string(b))
 	}
 }
+
+func TestOptions(t *testing.T) {
+	var (
+		name             = "service-name"
+		id               = "service-id"
+		version          = "service-version"
+		address          = "service-addr"
+		advertise        = "service-adv"
+		registry         = mock.NewRegistry()
+		registerTTL      = 123 * time.Second
+		registerInterval = 456 * time.Second
+		handler          = http.NewServeMux()
+		metadata         = map[string]string{"key": "val"}
+	)
+
+	service := NewService(
+		Name(name),
+		Id(id),
+		Version(version),
+		Address(address),
+		Advertise(advertise),
+		Registry(registry),
+		RegisterTTL(registerTTL),
+		RegisterInterval(registerInterval),
+		Handler(handler),
+		Metadata(metadata),
+	)
+
+	opts := service.Options()
+
+	tests := []struct {
+		subject string
+		want    interface{}
+		have    interface{}
+	}{
+		{"name", name, opts.Name},
+		{"version", version, opts.Version},
+		{"id", id, opts.Id},
+		{"address", address, opts.Address},
+		{"advertise", advertise, opts.Advertise},
+		{"registry", registry, opts.Registry},
+		{"registerTTL", registerTTL, opts.RegisterTTL},
+		{"registerInterval", registerInterval, opts.RegisterInterval},
+		{"handler", handler, opts.Handler},
+		{"metadata", metadata["key"], opts.Metadata["key"]},
+	}
+
+	for _, tc := range tests {
+		if tc.want != tc.have {
+			t.Errorf("unexpected %s: want %v, have %v", tc.subject, tc.want, tc.have)
+		}
+	}
+}
