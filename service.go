@@ -286,3 +286,8 @@ func (s *service) Run() error {
 
 	return s.stop()
 }
+
+// Options returns the options for the given service
+func (s *service) Options() Options {
+	return s.opts
+}
