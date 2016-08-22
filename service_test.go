@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/signal"
 	"syscall"
 	"testing"
 	"time"
@@ -61,7 +63,11 @@ func TestService(t *testing.T) {
 		t.Errorf("Expected %s got %s", str, string(b))
 	}
 
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGTERM)
+
 	syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
+	<-ch
 
 	eventually(func() bool {
 		_, err := reg.GetService("go.micro.web.test")
