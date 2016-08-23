@@ -106,7 +106,7 @@ func (s *service) deregister() error {
 	if s.srv == nil {
 		return nil
 	}
-	return registry.Deregister(s.srv)
+	return s.opts.Registry.Deregister(s.srv)
 }
 
 func (s *service) start() error {

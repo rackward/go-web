@@ -4,9 +4,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"testing"
 	"time"
 
+	"github.com/micro/go-micro/registry"
 	"github.com/micro/go-micro/registry/mock"
 )
 
@@ -17,11 +21,11 @@ func TestService(t *testing.T) {
 		fmt.Fprint(w, str)
 	}
 
-	registry := mock.NewRegistry()
+	reg := mock.NewRegistry()
 
 	service := NewService(
 		Name("go.micro.web.test"),
-		Registry(registry),
+		Registry(reg),
 	)
 
 	service.HandleFunc("/", fn)
@@ -32,12 +36,16 @@ func TestService(t *testing.T) {
 		}
 	}()
 
-	// another ugly hack
-	time.Sleep(time.Millisecond * 100)
+	var s []*registry.Service
 
-	s, err := registry.GetService("go.micro.web.test")
-	if err != nil {
-		t.Fatal(err)
+	eventually(func() bool {
+		var err error
+		s, err = reg.GetService("go.micro.web.test")
+		return err == nil
+	}, t.Fatal)
+
+	if have, want := len(s), 1; have != want {
+		t.Fatalf("Expected %d but got %d services", want, have)
 	}
 
 	rsp, err := http.Get(fmt.Sprintf("http://%s:%d", s[0].Nodes[0].Address, s[0].Nodes[0].Port))
@@ -54,6 +62,17 @@ func TestService(t *testing.T) {
 	if string(b) != str {
 		t.Errorf("Expected %s got %s", str, string(b))
 	}
+
+	ch := make(chan os.Signal, 1)
+	signal.Notify(ch, syscall.SIGTERM)
+
+	syscall.Kill(syscall.Getpid(), syscall.SIGTERM)
+	<-ch
+
+	eventually(func() bool {
+		_, err := reg.GetService("go.micro.web.test")
+		return err == registry.ErrNotFound
+	}, t.Error)
 }
 
 func TestOptions(t *testing.T) {
@@ -105,6 +124,25 @@ func TestOptions(t *testing.T) {
 	for _, tc := range tests {
 		if tc.want != tc.have {
 			t.Errorf("unexpected %s: want %v, have %v", tc.subject, tc.want, tc.have)
+		}
+	}
+}
+
+func eventually(pass func() bool, fail func(...interface{})) {
+	tick := time.NewTicker(10 * time.Millisecond)
+	defer tick.Stop()
+
+	timeout := time.After(time.Second)
+
+	for {
+		select {
+		case <-timeout:
+			fail("timed out")
+			return
+		case <-tick.C:
+			if pass() {
+				return
+			}
 		}
 	}
 }
