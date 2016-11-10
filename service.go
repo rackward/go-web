@@ -99,14 +99,14 @@ func (s *service) register() error {
 	if s.srv == nil {
 		return nil
 	}
-	return s.opts.Registry.Register(s.srv, registry.RegisterTTL(s.opts.RegisterTTL))
+	return registry.Register(s.srv, registry.RegisterTTL(s.opts.RegisterTTL))
 }
 
 func (s *service) deregister() error {
 	if s.srv == nil {
 		return nil
 	}
-	return s.opts.Registry.Deregister(s.srv)
+	return registry.Deregister(s.srv)
 }
 
 func (s *service) start() error {

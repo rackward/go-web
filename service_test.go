@@ -82,7 +82,7 @@ func TestOptions(t *testing.T) {
 		version          = "service-version"
 		address          = "service-addr"
 		advertise        = "service-adv"
-		registry         = mock.NewRegistry()
+		reg              = mock.NewRegistry()
 		registerTTL      = 123 * time.Second
 		registerInterval = 456 * time.Second
 		handler          = http.NewServeMux()
@@ -95,7 +95,7 @@ func TestOptions(t *testing.T) {
 		Version(version),
 		Address(address),
 		Advertise(advertise),
-		Registry(registry),
+		Registry(reg),
 		RegisterTTL(registerTTL),
 		RegisterInterval(registerInterval),
 		Handler(handler),
@@ -114,7 +114,7 @@ func TestOptions(t *testing.T) {
 		{"id", id, opts.Id},
 		{"address", address, opts.Address},
 		{"advertise", advertise, opts.Advertise},
-		{"registry", registry, opts.Registry},
+		{"registry", reg, registry.DefaultRegistry},
 		{"registerTTL", registerTTL, opts.RegisterTTL},
 		{"registerInterval", registerInterval, opts.RegisterInterval},
 		{"handler", handler, opts.Handler},

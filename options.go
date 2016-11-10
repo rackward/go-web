@@ -19,7 +19,6 @@ type Options struct {
 
 	RegisterTTL      time.Duration
 	RegisterInterval time.Duration
-	Registry         registry.Registry
 
 	Handler http.Handler
 
@@ -35,7 +34,6 @@ func newOptions(opts ...Option) Options {
 		Address:          DefaultAddress,
 		RegisterTTL:      DefaultRegisterTTL,
 		RegisterInterval: DefaultRegisterInterval,
-		Registry:         registry.DefaultRegistry,
 	}
 
 	for _, o := range opts {
@@ -108,6 +106,6 @@ func Handler(h http.Handler) Option {
 // Set registry to be used by the service
 func Registry(r registry.Registry) Option {
 	return func(o *Options) {
-		o.Registry = r
+		registry.DefaultRegistry = r
 	}
 }
