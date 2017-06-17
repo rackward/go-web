@@ -135,7 +135,19 @@ func (s *service) start() error {
 		h = s.mux
 	}
 
+	for _, fn := range s.opts.BeforeStart {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+
 	go http.Serve(l, h)
+
+	for _, fn := range s.opts.AfterStart {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
 
 	go func() {
 		ch := <-s.exit
@@ -156,10 +168,27 @@ func (s *service) stop() error {
 		return nil
 	}
 
+	for _, fn := range s.opts.BeforeStop {
+		if err := fn(); err != nil {
+			return err
+		}
+	}
+
 	ch := make(chan error, 1)
 	s.exit <- ch
 	s.running = false
+
 	fmt.Println("stopping")
+
+	for _, fn := range s.opts.AfterStop {
+		if err := fn(); err != nil {
+			if chErr := <-ch; chErr != nil {
+				return chErr
+			}
+			return err
+		}
+	}
+
 	return <-ch
 }
 
@@ -247,10 +276,13 @@ func (s *service) Init(opts ...Option) error {
 		return before(ctx)
 	}
 
-	cmd.Init()
-
 	for _, o := range opts {
 		o(&s.opts)
+	}
+
+	err := cmd.Init()
+	if err != nil {
+		return err
 	}
 
 	srv := s.genSrv()
