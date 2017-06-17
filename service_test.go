@@ -10,22 +10,49 @@ import (
 	"testing"
 	"time"
 
+	"github.com/micro/cli"
 	"github.com/micro/go-micro/registry"
 	"github.com/micro/go-micro/registry/mock"
 )
 
 func TestService(t *testing.T) {
-	str := `<html><body><h1>Hello World</h1></body></html>`
+	var (
+		beforeStartCalled bool
+		afterStartCalled  bool
+		beforeStopCalled  bool
+		afterStopCalled   bool
+		str               = `<html><body><h1>Hello World</h1></body></html>`
+		fn                = func(w http.ResponseWriter, r *http.Request) { fmt.Fprint(w, str) }
+		reg               = mock.NewRegistry()
+	)
 
-	fn := func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, str)
+	beforeStart := func() error {
+		beforeStartCalled = true
+		return nil
 	}
 
-	reg := mock.NewRegistry()
+	afterStart := func() error {
+		afterStartCalled = true
+		return nil
+	}
+
+	beforeStop := func() error {
+		beforeStopCalled = true
+		return nil
+	}
+
+	afterStop := func() error {
+		afterStopCalled = true
+		return nil
+	}
 
 	service := NewService(
 		Name("go.micro.web.test"),
 		Registry(reg),
+		BeforeStart(beforeStart),
+		AfterStart(afterStart),
+		BeforeStop(beforeStop),
+		AfterStop(afterStop),
 	)
 
 	service.HandleFunc("/", fn)
@@ -63,6 +90,20 @@ func TestService(t *testing.T) {
 		t.Errorf("Expected %s got %s", str, string(b))
 	}
 
+	callbackTests := []struct {
+		subject string
+		have    interface{}
+	}{
+		{"beforeStartCalled", beforeStartCalled},
+		{"afterStartCalled", afterStartCalled},
+	}
+
+	for _, tt := range callbackTests {
+		if tt.have != true {
+			t.Errorf("unexpected %s: want true, have false", tt.subject)
+		}
+	}
+
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM)
 
@@ -73,6 +114,20 @@ func TestService(t *testing.T) {
 		_, err := reg.GetService("go.micro.web.test")
 		return err == registry.ErrNotFound
 	}, t.Error)
+
+	callbackTests = []struct {
+		subject string
+		have    interface{}
+	}{
+		{"beforeStopCalled", beforeStopCalled},
+		{"afterStopCalled", afterStopCalled},
+	}
+
+	for _, tt := range callbackTests {
+		if tt.have != true {
+			t.Errorf("unexpected %s: want true, have false", tt.subject)
+		}
+	}
 }
 
 func TestOptions(t *testing.T) {
@@ -87,6 +142,10 @@ func TestOptions(t *testing.T) {
 		registerInterval = 456 * time.Second
 		handler          = http.NewServeMux()
 		metadata         = map[string]string{"key": "val"}
+		actionCalled     = false
+		action           = func(c *cli.Context) { actionCalled = true }
+		cmdFlag          = cli.StringFlag{Name: "foo"}
+		hasCmdFlag       = false
 	)
 
 	service := NewService(
@@ -100,9 +159,23 @@ func TestOptions(t *testing.T) {
 		RegisterInterval(registerInterval),
 		Handler(handler),
 		Metadata(metadata),
+		Flags(cmdFlag),
+		Action(action),
 	)
 
+	err := service.Init()
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	opts := service.Options()
+	flags := opts.Cmd.App().Flags
+
+	for _, f := range flags {
+		if f.GetName() == "foo" {
+			hasCmdFlag = true
+		}
+	}
 
 	tests := []struct {
 		subject string
@@ -119,6 +192,8 @@ func TestOptions(t *testing.T) {
 		{"registerInterval", registerInterval, opts.RegisterInterval},
 		{"handler", handler, opts.Handler},
 		{"metadata", metadata["key"], opts.Metadata["key"]},
+		{"action", true, actionCalled},
+		{"flags", true, hasCmdFlag},
 	}
 
 	for _, tc := range tests {
