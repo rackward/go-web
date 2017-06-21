@@ -226,6 +226,10 @@ func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 }
 
 func (s *service) Init(opts ...Option) error {
+	for _, o := range opts {
+		o(&s.opts)
+	}
+
 	app := s.opts.Cmd.App()
 
 	app.Flags = append(app.Flags,
@@ -273,10 +277,6 @@ func (s *service) Init(opts ...Option) error {
 		}
 
 		return before(ctx)
-	}
-
-	for _, o := range opts {
-		o(&s.opts)
 	}
 
 	err := s.opts.Cmd.Init()
