@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/micro/cli"
-	"github.com/micro/go-micro/cmd"
 	"github.com/micro/go-micro/registry"
 )
 
@@ -227,7 +226,7 @@ func (s *service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 }
 
 func (s *service) Init(opts ...Option) error {
-	app := cmd.App()
+	app := s.opts.Cmd.App()
 
 	app.Flags = append(app.Flags,
 		cli.IntFlag{
@@ -280,7 +279,7 @@ func (s *service) Init(opts ...Option) error {
 		o(&s.opts)
 	}
 
-	err := cmd.Init()
+	err := s.opts.Cmd.Init()
 	if err != nil {
 		return err
 	}
