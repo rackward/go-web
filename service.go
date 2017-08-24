@@ -148,13 +148,14 @@ func (s *service) start() error {
 		}
 	}
 
+	s.exit = make(chan chan error, 1)
+	s.running = true
+
 	go func() {
 		ch := <-s.exit
 		ch <- l.Close()
 	}()
 
-	s.exit = make(chan chan error, 1)
-	s.running = true
 	fmt.Printf("Listening on %v\n", l.Addr().String())
 	return nil
 }
