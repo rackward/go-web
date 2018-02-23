@@ -1,7 +1,6 @@
 package web
 
 import (
-	"fmt"
 	"net"
 	"net/http"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"time"
 
 	"github.com/micro/cli"
+	"github.com/micro/go-log"
 	"github.com/micro/go-micro/registry"
 )
 
@@ -156,7 +156,7 @@ func (s *service) start() error {
 		ch <- l.Close()
 	}()
 
-	fmt.Printf("Listening on %v\n", l.Addr().String())
+	log.Logf("Listening on %v\n", l.Addr().String())
 	return nil
 }
 
@@ -178,7 +178,7 @@ func (s *service) stop() error {
 	s.exit <- ch
 	s.running = false
 
-	fmt.Println("stopping")
+	log.Log("Stopping")
 
 	for _, fn := range s.opts.AfterStop {
 		if err := fn(); err != nil {
@@ -307,7 +307,15 @@ func (s *service) Run() error {
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGKILL)
-	fmt.Printf("Received signal %s\n", <-ch)
+
+	select {
+	// wait on kill signal
+	case sig := <-ch:
+		log.Logf("Received signal %s\n", sig)
+	// wait on context cancel
+	case <-s.opts.Context.Done():
+		log.Logf("Received context shutdown")
+	}
 
 	// exit reg loop
 	close(ex)

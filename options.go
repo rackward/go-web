@@ -43,6 +43,7 @@ func newOptions(opts ...Option) Options {
 		RegisterTTL:      DefaultRegisterTTL,
 		RegisterInterval: DefaultRegisterInterval,
 		Cmd:              cmd.DefaultCmd,
+		Context:          context.TODO(),
 	}
 
 	for _, o := range opts {
@@ -91,6 +92,15 @@ func Address(a string) Option {
 func Advertise(a string) Option {
 	return func(o *Options) {
 		o.Advertise = a
+	}
+}
+
+// Context specifies a context for the service.
+// Can be used to signal shutdown of the service.
+// Can be used for extra option values.
+func Context(ctx context.Context) Option {
+	return func(o *Options) {
+		o.Context = ctx
 	}
 }
 
