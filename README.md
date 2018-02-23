@@ -1,8 +1,10 @@
 # Go Web [![GoDoc](https://godoc.org/github.com/micro/go-web?status.svg)](https://godoc.org/github.com/micro/go-web) [![Travis CI](https://travis-ci.org/micro/go-web.svg?branch=master)](https://travis-ci.org/micro/go-web) [![Go Report Card](https://goreportcard.com/badge/micro/go-web)](https://goreportcard.com/report/github.com/micro/go-web)
 
-**Go-web** is a tiny HTTP web server library which leverages [go-micro](https://github.com/micro/go-micro) to create 
-micro web services as first class citizens in a microservice ecosystem. It's merely a wrapper around registration, 
-heartbeating and initialization of the go-micro client. In the future go-platform features may be included.
+**Go-web** is a framework for micro web app development.
+
+Go-web is a tiny HTTP web server library which leverages [go-micro](https://github.com/micro/go-micro) to create 
+micro web services as first class citizens in a microservice world. It wraps go-micro to give you service discovery, 
+heartbeating and the ability to create web apps as microservices.
 
 ## Getting Started
 
