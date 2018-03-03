@@ -8,17 +8,17 @@ heartbeating and the ability to create web apps as microservices.
 
 ## Getting Started
 
-### Prerequisites
+### Dependencies
 
-Go-web uses a similar pattern to go-micro. Look at the go-micro [readme](https://github.com/micro/go-micro) for 
-starting up the registry.
+Go-web makes use of go-micro which means it needs service discovery
+
+See the go-micro [readme](https://github.com/micro/go-micro#service-discovery) for install instructions
 
 ### Usage
 
 ```go
 service := web.NewService(
-	web.Name("go.micro.web.example"),
-	web.Version("latest"),
+	web.Name("example"),
 )
 
 service.HandleFunc("/foo", fooHandler)
@@ -32,7 +32,7 @@ if err := service.Run(); err != nil {
 }
 ```
 
-### Use your own Handler
+### Custom Handler
 
 You might have a preference for a HTTP handler, so use something else. This loses the ability to register endpoints in discovery 
 but we'll fix that soon.

@@ -14,7 +14,7 @@ func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	service := web.NewService(
-		web.Name("go.micro.web.helloworld"),
+		web.Name("helloworld"),
 	)
 
 	service.HandleFunc("/", helloWorldHandler)
