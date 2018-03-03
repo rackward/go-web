@@ -1,10 +1,9 @@
 package web
 
 import (
+	"context"
 	"net/http"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/micro/cli"
 	"github.com/micro/go-micro/cmd"
