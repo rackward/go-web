@@ -140,11 +140,14 @@ func (s *service) start() error {
 		}
 	}
 
-	httpSrv := &http.Server{
-		ReadTimeout:  s.opts.ReadTimeout,
-		WriteTimeout: s.opts.WriteTimeout,
-		Handler:      h,
+	var httpSrv *http.Server
+	if s.opts.Server != nil {
+		httpSrv = s.opts.Server
+	} else {
+		httpSrv = &http.Server{}
 	}
+
+	httpSrv.Handler = h
 
 	go httpSrv.Serve(l)
 
