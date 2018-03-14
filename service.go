@@ -140,7 +140,13 @@ func (s *service) start() error {
 		}
 	}
 
-	go http.Serve(l, h)
+	httpSrv := &http.Server{
+		ReadTimeout:  s.opts.ReadTimeout,
+		WriteTimeout: s.opts.WriteTimeout,
+		Handler:      h,
+	}
+
+	go httpSrv.Serve(l)
 
 	for _, fn := range s.opts.AfterStart {
 		if err := fn(); err != nil {

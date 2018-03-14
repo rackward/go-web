@@ -21,6 +21,9 @@ type Options struct {
 	RegisterTTL      time.Duration
 	RegisterInterval time.Duration
 
+	ReadTimeout  time.Duration
+	WriteTimeout time.Duration
+
 	Handler http.Handler
 
 	// Alternative Options
