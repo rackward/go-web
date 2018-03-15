@@ -140,7 +140,16 @@ func (s *service) start() error {
 		}
 	}
 
-	go http.Serve(l, h)
+	var httpSrv *http.Server
+	if s.opts.Server != nil {
+		httpSrv = s.opts.Server
+	} else {
+		httpSrv = &http.Server{}
+	}
+
+	httpSrv.Handler = h
+
+	go httpSrv.Serve(l)
 
 	for _, fn := range s.opts.AfterStart {
 		if err := fn(); err != nil {

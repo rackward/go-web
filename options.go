@@ -21,6 +21,7 @@ type Options struct {
 	RegisterTTL      time.Duration
 	RegisterInterval time.Duration
 
+	Server  *http.Server
 	Handler http.Handler
 
 	// Alternative Options
@@ -118,6 +119,12 @@ func RegisterInterval(t time.Duration) Option {
 func Handler(h http.Handler) Option {
 	return func(o *Options) {
 		o.Handler = h
+	}
+}
+
+func Server(srv *http.Server) Option {
+	return func(o *Options) {
+		o.Server = srv
 	}
 }
 
