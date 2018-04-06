@@ -72,12 +72,12 @@ service := web.NewService(
 )
 ```
 
-## Call Web Service
+## Call Service
 
 Go-web includes a http.Client with a custom http.RoundTripper that uses service discovery
 
 ```go
 c := service.Client()
 
-rsp, err := c.Get("http://example.com")
+rsp, err := c.Get("http://example.com/foo")
 ```
