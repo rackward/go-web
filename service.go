@@ -14,6 +14,7 @@ import (
 	"github.com/micro/cli"
 	"github.com/micro/go-log"
 	"github.com/micro/go-micro/registry"
+	mhttp "github.com/micro/misc/lib/http"
 )
 
 type service struct {
@@ -199,6 +200,15 @@ func (s *service) stop() error {
 	}
 
 	return <-ch
+}
+
+func (s *service) Client() *http.Client {
+	rt := mhttp.NewRoundTripper(
+		mhttp.WithRegistry(registry.DefaultRegistry),
+	)
+	return &http.Client{
+		Transport: rt,
+	}
 }
 
 func (s *service) Handle(pattern string, handler http.Handler) {
