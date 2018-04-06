@@ -17,7 +17,17 @@ heartbeating and the ability to create web apps as microservices.
 
 Go-web makes use of go-micro which means it needs service discovery
 
-See the go-micro [readme](https://github.com/micro/go-micro#service-discovery) for install instructions
+See the [go-micro](https://github.com/micro/go-micro#service-discovery) for install instructions
+
+For a quick start use consul
+
+```
+# install
+brew install consul
+
+# run
+consul agent -dev
+```
 
 ## Usage
 
@@ -58,7 +68,7 @@ service := web.NewService(
 
 Go-web includes a http.Client with a custom http.RoundTripper that uses service discovery
 
-```
+```go
 c := service.Client()
 
 rsp, err := c.Get("http://example)
