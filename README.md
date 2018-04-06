@@ -8,17 +8,32 @@ heartbeating and the ability to create web apps as microservices.
 
 ## Getting Started
 
-### Dependencies
+- [Dependencies](#dependencies)
+- [Usage](#usage)
+- [Custom Handler](#custom-handler)
+- [Call Web Service](#call-web-service)
+
+## Dependencies
 
 Go-web makes use of go-micro which means it needs service discovery
 
-See the go-micro [readme](https://github.com/micro/go-micro#service-discovery) for install instructions
+See the [go-micro](https://github.com/micro/go-micro#service-discovery) for install instructions
 
-### Usage
+For a quick start use consul
+
+```
+# install
+brew install consul
+
+# run
+consul agent -dev
+```
+
+## Usage
 
 ```go
 service := web.NewService(
-	web.Name("example"),
+	web.Name("example.com"),
 )
 
 service.HandleFunc("/foo", fooHandler)
@@ -32,7 +47,7 @@ if err := service.Run(); err != nil {
 }
 ```
 
-### Custom Handler
+## Custom Handler
 
 You might have a preference for a HTTP handler, so use something else. This loses the ability to register endpoints in discovery 
 but we'll fix that soon.
@@ -47,4 +62,14 @@ r.HandleFunc("/objects/{object}", objectHandler)
 service := web.NewService(
 	web.Handler(r)
 )
+```
+
+## Call Web Service
+
+Go-web includes a http.Client with a custom http.RoundTripper that uses service discovery
+
+```go
+c := service.Client()
+
+rsp, err := c.Get("http://example.com")
 ```
