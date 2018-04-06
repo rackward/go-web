@@ -33,7 +33,7 @@ consul agent -dev
 
 ```go
 service := web.NewService(
-	web.Name("example"),
+	web.Name("example.com"),
 )
 
 service.HandleFunc("/foo", fooHandler)
@@ -71,5 +71,5 @@ Go-web includes a http.Client with a custom http.RoundTripper that uses service 
 ```go
 c := service.Client()
 
-rsp, err := c.Get("http://example)
+rsp, err := c.Get("http://example.com")
 ```
