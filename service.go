@@ -242,19 +242,6 @@ func (s *service) Init(opts ...Option) error {
 
 	app := s.opts.Cmd.App()
 
-	app.Flags = append(app.Flags,
-		cli.IntFlag{
-			Name:   "register_ttl",
-			EnvVar: "MICRO_REGISTER_TTL",
-			Usage:  "Register TTL in seconds",
-		},
-		cli.IntFlag{
-			Name:   "register_interval",
-			EnvVar: "MICRO_REGISTER_INTERVAL",
-			Usage:  "Register interval in seconds",
-		},
-	)
-
 	before := app.Before
 
 	app.Before = func(ctx *cli.Context) error {
