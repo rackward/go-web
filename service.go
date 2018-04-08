@@ -14,7 +14,7 @@ import (
 	"github.com/micro/cli"
 	"github.com/micro/go-log"
 	"github.com/micro/go-micro/registry"
-	mhttp "github.com/micro/misc/lib/http"
+	mhttp "github.com/micro/util/go/lib/http"
 )
 
 type service struct {
