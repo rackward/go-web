@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/micro/cli"
-	"github.com/micro/go-micro/registry"
-	"github.com/micro/go-micro/registry/mock"
+	"github.com/divisionone/go-micro/registry"
+	"github.com/divisionone/go-micro/registry/mock"
 )
 
 func TestService(t *testing.T) {

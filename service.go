@@ -13,8 +13,8 @@ import (
 
 	"github.com/micro/cli"
 	"github.com/micro/go-log"
-	"github.com/micro/go-micro/registry"
-	mhttp "github.com/micro/util/go/lib/http"
+	"github.com/divisionone/go-micro/registry"
+	mhttp "github.com/divisionone/util/go/lib/http"
 )
 
 type service struct {
@@ -160,6 +160,10 @@ func (s *service) start() error {
 
 	s.exit = make(chan chan error, 1)
 	s.running = true
+
+	if _, port, _ := net.SplitHostPort(s.opts.Address); port != "" && s.srv.Nodes[0].Port == 0 {
+		s.srv.Nodes[0].Port, _ = strconv.Atoi(port)
+	}
 
 	go func() {
 		ch := <-s.exit

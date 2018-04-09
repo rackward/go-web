@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/micro/go-web"
+	"github.com/divisionone/go-web"
 )
 
 func helloWorldHandler(w http.ResponseWriter, r *http.Request) {
