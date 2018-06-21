@@ -2,12 +2,13 @@ package web
 
 import (
 	"context"
+	"net"
 	"net/http"
 	"time"
 
-	"github.com/micro/cli"
 	"github.com/divisionone/go-micro/cmd"
 	"github.com/divisionone/go-micro/registry"
+	"github.com/micro/cli"
 )
 
 type Options struct {
@@ -21,6 +22,7 @@ type Options struct {
 	RegisterTTL      time.Duration
 	RegisterInterval time.Duration
 
+	Listen  func(network, address string) (net.Listener, error)
 	Server  *http.Server
 	Handler http.Handler
 
@@ -44,6 +46,7 @@ func newOptions(opts ...Option) Options {
 		RegisterInterval: DefaultRegisterInterval,
 		Cmd:              cmd.DefaultCmd,
 		Context:          context.TODO(),
+		Listen:           net.Listen,
 	}
 
 	for _, o := range opts {
@@ -51,6 +54,12 @@ func newOptions(opts ...Option) Options {
 	}
 
 	return opt
+}
+
+func Listen(fn func(network, address string) (net.Listener, error)) Option {
+	return func(o *Options) {
+		o.Listen = fn
+	}
 }
 
 // Server name

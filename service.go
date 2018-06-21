@@ -11,10 +11,10 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/micro/cli"
-	"github.com/micro/go-log"
 	"github.com/divisionone/go-micro/registry"
 	mhttp "github.com/divisionone/util/go/lib/http"
+	"github.com/micro/cli"
+	"github.com/micro/go-log"
 )
 
 type service struct {
@@ -117,7 +117,7 @@ func (s *service) start() error {
 		return nil
 	}
 
-	l, err := net.Listen("tcp", s.opts.Address)
+	l, err := s.opts.Listen("tcp", s.opts.Address)
 	if err != nil {
 		return err
 	}
