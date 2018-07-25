@@ -10,7 +10,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/micro/cli"
 	"github.com/divisionone/go-micro/registry"
 	"github.com/divisionone/go-micro/registry/mock"
 )
@@ -142,10 +141,6 @@ func TestOptions(t *testing.T) {
 		registerInterval = 456 * time.Second
 		handler          = http.NewServeMux()
 		metadata         = map[string]string{"key": "val"}
-		actionCalled     = false
-		action           = func(c *cli.Context) { actionCalled = true }
-		cmdFlag          = cli.StringFlag{Name: "foo"}
-		hasCmdFlag       = false
 	)
 
 	service := NewService(
@@ -159,23 +154,9 @@ func TestOptions(t *testing.T) {
 		RegisterInterval(registerInterval),
 		Handler(handler),
 		Metadata(metadata),
-		Flags(cmdFlag),
-		Action(action),
 	)
 
-	err := service.Init()
-	if err != nil {
-		t.Fatal(err)
-	}
-
 	opts := service.Options()
-	flags := opts.Cmd.App().Flags
-
-	for _, f := range flags {
-		if f.GetName() == "foo" {
-			hasCmdFlag = true
-		}
-	}
 
 	tests := []struct {
 		subject string
@@ -192,8 +173,6 @@ func TestOptions(t *testing.T) {
 		{"registerInterval", registerInterval, opts.RegisterInterval},
 		{"handler", handler, opts.Handler},
 		{"metadata", metadata["key"], opts.Metadata["key"]},
-		{"action", true, actionCalled},
-		{"flags", true, hasCmdFlag},
 	}
 
 	for _, tc := range tests {

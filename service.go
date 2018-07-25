@@ -13,6 +13,7 @@ import (
 
 	"github.com/divisionone/go-micro/registry"
 	mhttp "github.com/divisionone/util/go/lib/http"
+	maddr "github.com/micro/util/go/lib/addr"
 	"github.com/micro/cli"
 	"github.com/micro/go-log"
 )
@@ -39,30 +40,35 @@ func newService(opts ...Option) Service {
 }
 
 func (s *service) genSrv() *registry.Service {
-	// parse address for host, port
-	var advt, host string
-	var port int
+	// default host:port
+	parts := strings.Split(s.opts.Address, ":")
+	host := strings.Join(parts[:len(parts)-1], ":")
+	port, _ := strconv.Atoi(parts[len(parts)-1])
 
 	// check the advertise address first
 	// if it exists then use it, otherwise
 	// use the address
 	if len(s.opts.Advertise) > 0 {
-		advt = s.opts.Advertise
-	} else {
-		advt = s.opts.Address
+		parts = strings.Split(s.opts.Advertise, ":")
+
+		// we have host:port
+		if len(parts) > 1 {
+			// set the host
+			host = strings.Join(parts[:len(parts)-1], ":")
+
+			// get the port
+			if aport, _ := strconv.Atoi(parts[len(parts)-1]); aport > 0 {
+				port = aport
+			}
+		} else {
+			host = parts[0]
+		}
 	}
 
-	parts := strings.Split(advt, ":")
-	if len(parts) > 1 {
-		host = strings.Join(parts[:len(parts)-1], ":")
-		port, _ = strconv.Atoi(parts[len(parts)-1])
-	} else {
-		host = parts[0]
-	}
-
-	addr, err := extractAddress(host)
+	addr, err := maddr.Extract(host)
 	if err != nil {
-		return nil
+		// best effort localhost
+		addr = "127.0.0.1"
 	}
 
 	return &registry.Service{
@@ -117,7 +123,7 @@ func (s *service) start() error {
 		return nil
 	}
 
-	l, err := s.opts.Listen("tcp", s.opts.Address)
+	l, err := net.Listen("tcp", s.opts.Address)
 	if err != nil {
 		return err
 	}
@@ -160,10 +166,6 @@ func (s *service) start() error {
 
 	s.exit = make(chan chan error, 1)
 	s.running = true
-
-	if _, port, _ := net.SplitHostPort(s.opts.Address); port != "" && s.srv.Nodes[0].Port == 0 {
-		s.srv.Nodes[0].Port, _ = strconv.Atoi(port)
-	}
 
 	go func() {
 		ch := <-s.exit
