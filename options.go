@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/cmd"
 	"github.com/divisionone/go-micro/registry"
-	"github.com/micro/cli"
 )
 
 type Options struct {

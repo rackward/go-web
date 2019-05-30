@@ -11,11 +11,11 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/registry"
 	mhttp "github.com/divisionone/util/go/lib/http"
-	maddr "github.com/micro/util/go/lib/addr"
-	"github.com/micro/cli"
 	"github.com/micro/go-log"
+	maddr "github.com/micro/util/go/lib/addr"
 )
 
 type service struct {
@@ -74,7 +74,7 @@ func (s *service) genSrv() *registry.Service {
 	return &registry.Service{
 		Name:    s.opts.Name,
 		Version: s.opts.Version,
-		Nodes: []*registry.Node{&registry.Node{
+		Nodes: []*registry.Node{{
 			Id:       s.opts.Id,
 			Address:  addr,
 			Port:     port,
