@@ -10,6 +10,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
+	"context"
 
 	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/registry"
@@ -169,7 +170,7 @@ func (s *service) start() error {
 
 	go func() {
 		ch := <-s.exit
-		ch <- l.Close()
+		ch <- httpSrv.Shutdown(context.Background())
 	}()
 
 	log.Logf("Listening on %v\n", l.Addr().String())
