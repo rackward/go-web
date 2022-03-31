@@ -1,6 +1,7 @@
 package web
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"os"
@@ -10,13 +11,12 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	"context"
 
 	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/registry"
+	maddr "github.com/divisionone/util/go/lib/addr"
 	mhttp "github.com/divisionone/util/go/lib/http"
 	"github.com/micro/go-log"
-	maddr "github.com/micro/util/go/lib/addr"
 )
 
 type service struct {
