@@ -14,9 +14,9 @@ import (
 
 	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/registry"
+	"github.com/divisionone/micro-go-log"
 	maddr "github.com/divisionone/util/go/lib/addr"
 	mhttp "github.com/divisionone/util/go/lib/http"
-	"github.com/micro/go-log"
 )
 
 type service struct {
