@@ -158,14 +158,15 @@ func (s *service) start() error {
 
 	httpSrv.Handler = h
 
-	if s.opts.EnableTLS {
-		certGetter, err := selfSignedCertificateGetter()
+	if s.opts.TLSOptions.Enabled {
+		certGetter, err := selfSignedCertificateGetter(s.opts.TLSOptions)
 		if err != nil {
 			return err
 		}
 
 		httpSrv.TLSConfig = &tls.Config{
 			GetCertificate: certGetter,
+			InsecureSkipVerify: true,
 		}
 
 		go httpSrv.ServeTLS(l, "", "")

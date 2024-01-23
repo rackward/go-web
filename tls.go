@@ -19,7 +19,7 @@ import (
 )
 
 // selfSignedCertificateGetter returns a function that can be used as a certificate getter in TLSConfig.
-func selfSignedCertificateGetter() (func(*tls.ClientHelloInfo) (*tls.Certificate, error), error) {
+func selfSignedCertificateGetter(options *TLSOptions) (func(*tls.ClientHelloInfo) (*tls.Certificate, error), error) {
 	rootKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, fmt.Errorf("generating key: %v", err)
@@ -47,8 +47,8 @@ func selfSignedCertificateGetter() (func(*tls.ClientHelloInfo) (*tls.Certificate
 		tmpl.SerialNumber.Add(tmpl.SerialNumber, big.NewInt(1))
 
 		now := time.Now()
-		tmpl.NotBefore = now
-		tmpl.NotAfter = now.Add(1 * time.Hour)
+		tmpl.NotBefore = now.Add(-options.WiggleRoom)
+		tmpl.NotAfter = now.Add(options.TimeToLive)
 
 		certDER, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, rootKey.Public(), rootKey)
 		if err != nil {
@@ -75,7 +75,7 @@ func selfSignedCertificateGetter() (func(*tls.ClientHelloInfo) (*tls.Certificate
 
 		m.Lock()
 
-		if time.Now().After(tmpl.NotAfter) {
+		if time.Now().After(tmpl.NotAfter.Add(-options.WiggleRoom)) {
 			var log logrus.FieldLogger = logrus.StandardLogger()
 
 			defer func(genTime time.Time) {
