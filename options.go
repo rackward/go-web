@@ -38,6 +38,7 @@ type Options struct {
 	AfterStop   []func() error
 }
 
+// TLSOptions are options related to using TLS.
 type TLSOptions struct {
 	Enabled bool
 	// TimeToLive is how long until the self-signed certificate used for TLS expires.
