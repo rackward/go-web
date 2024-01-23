@@ -22,6 +22,8 @@ type Options struct {
 	RegisterTTL      time.Duration
 	RegisterInterval time.Duration
 
+	EnableTLS bool
+
 	Listen  func(network, address string) (net.Listener, error)
 	Server  *http.Server
 	Handler http.Handler
@@ -190,5 +192,11 @@ func AfterStart(fn func() error) Option {
 func AfterStop(fn func() error) Option {
 	return func(o *Options) {
 		o.AfterStop = append(o.AfterStop, fn)
+	}
+}
+
+func WithTLSEnabled(enabled bool) Option {
+	return func(o *Options) {
+		o.EnableTLS = enabled
 	}
 }

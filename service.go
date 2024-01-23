@@ -11,6 +11,7 @@ import (
 	"sync"
 	"syscall"
 	"time"
+	"crypto/tls"
 
 	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/registry"
@@ -157,7 +158,20 @@ func (s *service) start() error {
 
 	httpSrv.Handler = h
 
-	go httpSrv.Serve(l)
+	if s.opts.EnableTLS {
+		certGetter, err := selfSignedCertificateGetter()
+		if err != nil {
+			return err
+		}
+
+		httpSrv.TLSConfig = &tls.Config{
+			GetCertificate: certGetter,
+		}
+
+		go httpSrv.ServeTLS(l, "", "")
+	} else {
+		go httpSrv.Serve(l)
+	}
 
 	for _, fn := range s.opts.AfterStart {
 		if err := fn(); err != nil {
