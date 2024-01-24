@@ -9,6 +9,7 @@ import (
 	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/cmd"
 	"github.com/divisionone/go-micro/registry"
+	"github.com/rackward/go-web/tls"
 )
 
 type Options struct {
@@ -22,7 +23,8 @@ type Options struct {
 	RegisterTTL      time.Duration
 	RegisterInterval time.Duration
 
-	TLSOptions *TLSOptions
+	// NetServer is a hack that allows to optionally support TLS with our existing http.Server and net.Listener.
+	NetServer tls.NetServer
 
 	Listen  func(network, address string) (net.Listener, error)
 	Server  *http.Server
@@ -38,16 +40,6 @@ type Options struct {
 	AfterStop   []func() error
 }
 
-// TLSOptions are options related to using TLS.
-type TLSOptions struct {
-	Enabled bool
-	// TimeToLive is how long until the self-signed certificate used for TLS expires.
-	TimeToLive   time.Duration
-	// WiggleRoom defines a level of leeway for valid / expired certificates to help handle time differences between
-	// servers.
-	WiggleRoom time.Duration
-}
-
 func newOptions(opts ...Option) Options {
 	opt := Options{
 		Name:             DefaultName,
@@ -59,14 +51,16 @@ func newOptions(opts ...Option) Options {
 		Cmd:              cmd.DefaultCmd,
 		Context:          context.TODO(),
 		Listen:           net.Listen,
-		TLSOptions: 	  &TLSOptions{
-			TimeToLive: 1 * time.Hour,
-			WiggleRoom: 10 * time.Minute,
-		},
 	}
 
 	for _, o := range opts {
 		o(&opt)
+	}
+
+	// Setup default NetServer if one hasn't been set.
+	// This will wrap around the http.Server and optionally allows TLS if TLSNetServer is used.
+	if opt.NetServer == nil {
+		opt.NetServer = &tls.DefaultNetServer{}
 	}
 
 	return opt
@@ -210,23 +204,8 @@ func AfterStop(fn func() error) Option {
 }
 
 // WithTLSEnabled can be used to enable/disable TLS.
-func WithTLSEnabled(enabled bool) Option {
+func WithNetServer(server tls.NetServer) Option {
 	return func(o *Options) {
-		o.TLSOptions.Enabled = enabled
-	}
-}
-
-// WithTLSTimeToLive sets the time to live on a self-signed certificate used for TLS.
-func WithTLSTimeToLive(ttl time.Duration) Option {
-	return func(o *Options) {
-		o.TLSOptions.TimeToLive = ttl
-	}
-}
-
-// WithTLSWiggleRoom sets the level of leeway for valid / expired certificates to help handle time differences between
-// servers.
-func WithTLSWiggleRoom(wiggle time.Duration) Option {
-	return func(o *Options) {
-		o.TLSOptions.WiggleRoom = wiggle
+		o.NetServer = server
 	}
 }

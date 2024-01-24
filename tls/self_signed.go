@@ -1,25 +1,28 @@
-package web
+package tls
 
 import (
-	"sync"
-	"time"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/x509/pkix"
-	"crypto/x509"
 	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/pem"
 	"fmt"
 	"math/big"
+	"sync"
+	"time"
 
 	"github.com/sirupsen/logrus"
 )
 
 // selfSignedCertificateGetter returns a function that can be used as a certificate getter in TLSConfig.
-func selfSignedCertificateGetter(options *TLSOptions) (func(*tls.ClientHelloInfo) (*tls.Certificate, error), error) {
+func selfSignedCertificateGetter(
+	ttl time.Duration,
+	wiggleRoom time.Duration,
+) (func(*tls.ClientHelloInfo) (*tls.Certificate, error), error) {
 	rootKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		return nil, fmt.Errorf("generating key: %v", err)
@@ -47,8 +50,8 @@ func selfSignedCertificateGetter(options *TLSOptions) (func(*tls.ClientHelloInfo
 		tmpl.SerialNumber.Add(tmpl.SerialNumber, big.NewInt(1))
 
 		now := time.Now()
-		tmpl.NotBefore = now.Add(-options.WiggleRoom)
-		tmpl.NotAfter = now.Add(options.TimeToLive)
+		tmpl.NotBefore = now.Add(-wiggleRoom)
+		tmpl.NotAfter = now.Add(ttl)
 
 		certDER, err := x509.CreateCertificate(rand.Reader, tmpl, tmpl, rootKey.Public(), rootKey)
 		if err != nil {
@@ -75,7 +78,7 @@ func selfSignedCertificateGetter(options *TLSOptions) (func(*tls.ClientHelloInfo
 
 		m.Lock()
 
-		if time.Now().After(tmpl.NotAfter.Add(-options.WiggleRoom)) {
+		if time.Now().After(tmpl.NotAfter.Add(-wiggleRoom)) {
 			var log logrus.FieldLogger = logrus.StandardLogger()
 
 			defer func(genTime time.Time) {
@@ -117,4 +120,3 @@ func encodeKeyAsPEM(key crypto.PrivateKey) (rootKeyPEM []byte, err error) {
 
 	return rootKeyPEM, err
 }
-

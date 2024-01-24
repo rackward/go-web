@@ -11,11 +11,10 @@ import (
 	"sync"
 	"syscall"
 	"time"
-	"crypto/tls"
 
 	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/registry"
-	"github.com/divisionone/micro-go-log"
+	log "github.com/divisionone/micro-go-log"
 	maddr "github.com/divisionone/util/go/lib/addr"
 	mhttp "github.com/divisionone/util/go/lib/http"
 )
@@ -158,21 +157,7 @@ func (s *service) start() error {
 
 	httpSrv.Handler = h
 
-	if s.opts.TLSOptions.Enabled {
-		certGetter, err := selfSignedCertificateGetter(s.opts.TLSOptions)
-		if err != nil {
-			return err
-		}
-
-		httpSrv.TLSConfig = &tls.Config{
-			GetCertificate: certGetter,
-			InsecureSkipVerify: true,
-		}
-
-		go httpSrv.ServeTLS(l, "", "")
-	} else {
-		go httpSrv.Serve(l)
-	}
+	s.opts.NetServer.Serve(httpSrv, l)
 
 	for _, fn := range s.opts.AfterStart {
 		if err := fn(); err != nil {
