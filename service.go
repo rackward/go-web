@@ -25,6 +25,8 @@ type service struct {
 	mux *http.ServeMux
 	srv *registry.Service
 
+	netSrv *NetServer
+
 	sync.Mutex
 	running bool
 	exit    chan chan error
@@ -33,8 +35,9 @@ type service struct {
 func newService(opts ...Option) Service {
 	options := newOptions(opts...)
 	s := &service{
-		opts: options,
-		mux:  http.NewServeMux(),
+		opts:   options,
+		mux:    http.NewServeMux(),
+		netSrv: NewNetServer(),
 	}
 	s.srv = s.genSrv()
 	return s
@@ -161,7 +164,7 @@ func (s *service) start() error {
 		httpSrv.TLSConfig = s.opts.TLSConfig
 	}
 
-	s.opts.NetServer.Serve(httpSrv, l)
+	s.netSrv.Serve(httpSrv, l)
 
 	for _, fn := range s.opts.AfterStart {
 		if err := fn(); err != nil {

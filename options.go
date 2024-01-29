@@ -10,7 +10,6 @@ import (
 	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/cmd"
 	"github.com/divisionone/go-micro/registry"
-	"github.com/sirupsen/logrus"
 )
 
 type Options struct {
@@ -26,8 +25,6 @@ type Options struct {
 
 	// TLSConfig if set will make the server use TLS.
 	TLSConfig *tls.Config
-	// NetServer handles the initialisation of the server.
-	NetServer *NetServer
 
 	Listen  func(network, address string) (net.Listener, error)
 	Server  *http.Server
@@ -58,10 +55,6 @@ func newOptions(opts ...Option) Options {
 
 	for _, o := range opts {
 		o(&opt)
-	}
-
-	if opt.NetServer == nil {
-		opt.NetServer = NewNetServer(logrus.StandardLogger())
 	}
 
 	return opt
@@ -208,13 +201,5 @@ func AfterStop(fn func() error) Option {
 func WithTLSConfig(cfg *tls.Config) Option {
 	return func(o *Options) {
 		o.TLSConfig = cfg
-	}
-}
-
-// WithNetServer allows you to set the NetServer used to control serving of requests.
-// For now this just lets you control the logger used.
-func WithNetServer(server *NetServer) Option {
-	return func(o *Options) {
-		o.NetServer = server
 	}
 }

@@ -4,20 +4,16 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/sirupsen/logrus"
+	log "github.com/divisionone/micro-go-log"
 )
 
 // NetServer handles the initialisation of the http.Server by making sure it calls the correct startup method
 // based on the provided http.Server configuration.
-type NetServer struct {
-	log logrus.FieldLogger
-}
+type NetServer struct{}
 
 // NewNetServer returns a new initialised NetServer.
-func NewNetServer(log logrus.FieldLogger) *NetServer {
-	return &NetServer{
-		log: log,
-	}
+func NewNetServer() *NetServer {
+	return &NetServer{}
 }
 
 // Serve helps to ensure that the correct server startup method is called based on the provided http.
@@ -25,10 +21,10 @@ func NewNetServer(log logrus.FieldLogger) *NetServer {
 func (s *NetServer) Serve(server *http.Server, listener net.Listener) {
 	if server.TLSConfig != nil {
 		go func() {
-			s.log.Info("serving with TLS")
+			log.Log("serving with TLS")
 
 			if err := server.ServeTLS(listener, "", ""); err != nil {
-				s.log.WithError(err).Error("Error serving on TLS server")
+				log.Logf("Error serving on TLS server: %s", err.Error())
 			}
 		}()
 	} else {
