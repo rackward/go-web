@@ -204,9 +204,17 @@ func AfterStop(fn func() error) Option {
 	}
 }
 
-// WithTLSEnabled can be used to enable/disable TLS.
+// WithTLSConfig sets the tls configuration to use when serving requests.
 func WithTLSConfig(cfg *tls.Config) Option {
 	return func(o *Options) {
 		o.TLSConfig = cfg
+	}
+}
+
+// WithNetServer allows you to set the NetServer used to control serving of requests.
+// For now this just lets you control the logger used.
+func WithNetServer(server *NetServer) Option {
+	return func(o *Options) {
+		o.NetServer = server
 	}
 }
