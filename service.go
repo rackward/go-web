@@ -157,6 +157,10 @@ func (s *service) start() error {
 
 	httpSrv.Handler = h
 
+	if s.opts.TLSConfig != nil {
+		httpSrv.TLSConfig = s.opts.TLSConfig
+	}
+
 	s.opts.NetServer.Serve(httpSrv, l)
 
 	for _, fn := range s.opts.AfterStart {

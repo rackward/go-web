@@ -2,6 +2,7 @@ package web
 
 import (
 	"context"
+	"crypto/tls"
 	"net"
 	"net/http"
 	"time"
@@ -9,7 +10,7 @@ import (
 	"github.com/divisionone/cli"
 	"github.com/divisionone/go-micro/cmd"
 	"github.com/divisionone/go-micro/registry"
-	"github.com/rackward/go-web/tls"
+	"github.com/sirupsen/logrus"
 )
 
 type Options struct {
@@ -23,8 +24,10 @@ type Options struct {
 	RegisterTTL      time.Duration
 	RegisterInterval time.Duration
 
-	// NetServer is a hack that allows to optionally support TLS with our existing http.Server and net.Listener.
-	NetServer tls.NetServer
+	// TLSConfig if set will make the server use TLS.
+	TLSConfig *tls.Config
+	// NetServer handles the initialisation of the server.
+	NetServer *NetServer
 
 	Listen  func(network, address string) (net.Listener, error)
 	Server  *http.Server
@@ -57,10 +60,8 @@ func newOptions(opts ...Option) Options {
 		o(&opt)
 	}
 
-	// Setup default NetServer if one hasn't been set.
-	// This will wrap around the http.Server and optionally allows TLS if TLSNetServer is used.
 	if opt.NetServer == nil {
-		opt.NetServer = &tls.DefaultNetServer{}
+		opt.NetServer = NewNetServer(logrus.StandardLogger())
 	}
 
 	return opt
@@ -204,8 +205,8 @@ func AfterStop(fn func() error) Option {
 }
 
 // WithTLSEnabled can be used to enable/disable TLS.
-func WithNetServer(server tls.NetServer) Option {
+func WithTLSConfig(cfg *tls.Config) Option {
 	return func(o *Options) {
-		o.NetServer = server
+		o.TLSConfig = cfg
 	}
 }
