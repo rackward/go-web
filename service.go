@@ -25,7 +25,7 @@ type service struct {
 	mux *http.ServeMux
 	srv *registry.Service
 
-	netSrv *NetServer
+	netSrv *netServer
 
 	sync.Mutex
 	running bool
@@ -37,7 +37,7 @@ func newService(opts ...Option) Service {
 	s := &service{
 		opts:   options,
 		mux:    http.NewServeMux(),
-		netSrv: NewNetServer(),
+		netSrv: &netServer{},
 	}
 	s.srv = s.genSrv()
 	return s
